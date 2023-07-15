@@ -60,7 +60,7 @@ namespace Gimmick_ROM_extractor
 
                             /*
                              * To dynamically find where inside the AR_win32.mdf the ROM is stored, we encrypt the INES Header for GIMMICK! with the encryption
-                             * the games employs itself. Then we search for they encrypted files inside of AR_win32.mdf
+                             * the games employs itself. Then we search for they encrypted file inside of AR_win32.mdf
                              */
                             encryptor.TransformBlock(INES_HEADER_BYTES, 0, INES_HEADER_BYTES.Length, outputBuffer, 0);
                             Console.WriteLine("Searching for encrypted ROM in AR_win32.mdf...");
