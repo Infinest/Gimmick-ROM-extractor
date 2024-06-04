@@ -12,6 +12,7 @@ namespace Gimmick_ROM_extractor
     internal class RomConfiguration
     {
         public List<List<byte>> INES_HEADERS { get; set; }
+        public string TARGET_FILE { get; set; } = "AR_win32.mdf";
         public string AES_KEY { get; set; }
         public uint[] ROM_SIZES { get; set; }
         public string[] OUTPUT_NAMES { get; set; }
@@ -36,7 +37,7 @@ namespace Gimmick_ROM_extractor
             bool hasConfirmed = false;
             do
             {
-                Console.WriteLine("Extract ROM/s from AR_win32.mdf? [y/n]");
+                Console.WriteLine(String.Format("Extract ROM/s from {0}? [y/n]", config.TARGET_FILE));
                 ConsoleKeyInfo input = Console.ReadKey();
                 switch (input.Key)
                 {
@@ -64,7 +65,7 @@ namespace Gimmick_ROM_extractor
 
                 try
                 {
-                    using (FileStream mdf = File.Open(Path.Combine(Directory.GetCurrentDirectory(), "AR_win32.mdf"), FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (FileStream mdf = File.Open(Path.Combine(Directory.GetCurrentDirectory(), config.TARGET_FILE), FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         IntPtr romOffset = IntPtr.Zero;
                         for (int i = 0; i < config.INES_HEADERS.Count; i++)
@@ -74,16 +75,16 @@ namespace Gimmick_ROM_extractor
                             ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
                             /*
-                             * To dynamically find where inside the AR_win32.mdf the ROM is stored, we encrypt the INES Header with the encryption
-                             * the game employs itself. Then we search for the encrypted file inside of AR_win32.mdf
+                             * To dynamically find where inside the config.TARGET_FILE the ROM is stored, we encrypt the INES Header with the encryption
+                             * the game employs itself. Then we search for the encrypted file inside of config.TARGET_FILE
                              */
                             encryptor.TransformBlock(config.INES_HEADERS[i].ToArray(), 0, config.INES_HEADERS[i].Count, outputBuffer, 0);
-                            Console.WriteLine("Searching for encrypted ROM in AR_win32.mdf...");
+                            Console.WriteLine(String.Format("Searching for encrypted ROM in {0}...", config.TARGET_FILE));
                             romOffset = findOffset(outputBuffer, mdf, config.RESET_OFFSET_AFTER_SEARCH || romOffset == IntPtr.Zero ? IntPtr.Zero : romOffset + config.INES_HEADERS[i - 1].Count);
 
                             if (romOffset == IntPtr.Zero)
                             {
-                                Console.WriteLine("Could not find encrypted ROM inside AR_win32.mdf");
+                                Console.WriteLine(String.Format("Could not find encrypted ROM inside {0}", config.TARGET_FILE));
                                 Environment.Exit(GENERIC_PROCESSING_ERROR);
                             }
 
@@ -107,7 +108,7 @@ namespace Gimmick_ROM_extractor
                 }
                 catch (System.IO.FileNotFoundException e)
                 {
-                    Console.WriteLine("Could not find AR_win32.mdf file. Please ensure this application and AR_win32.mdf are located in the same directory.");
+                    Console.WriteLine(String.Format("Could not find {0} file. Please ensure this application and {0} are located in the same directory.", config.TARGET_FILE));
                     Environment.Exit(GENERIC_PROCESSING_ERROR);
                 }
             }
@@ -183,7 +184,7 @@ namespace Gimmick_ROM_extractor
             }
             catch (FileNotFoundException e)
             {
-                Console.WriteLine("Could not find AR_win32.mdf file. Please ensure this application and AR_win32.mdf are located in the same directory.");
+                Console.WriteLine("Could not find config.json file. Please ensure this application and config.json are located in the same directory.");
                 return null;
             }
         }
