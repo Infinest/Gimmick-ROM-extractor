@@ -11,6 +11,7 @@ namespace Gimmick_ROM_extractor
 {
     internal class RomConfiguration
     {
+        public List<List<byte>> INES_HEADERS_FIXED {  get; set; } = new List<List<byte>>();
         public List<List<byte>> INES_HEADERS { get; set; }
         public string TARGET_FILE { get; set; } = "AR_win32.mdf";
         public string AES_KEY { get; set; }
@@ -101,17 +102,51 @@ namespace Gimmick_ROM_extractor
                             {
                                 fs.Write(outputBuffer, 0, outputBuffer.Length);
                                 Console.WriteLine(String.Format("Wrote ROM to {0}", outputPath));
+
+                                if (i <= config.INES_HEADERS_FIXED.Count - 1)
+                                {
+                                    fixINesHeader(config.INES_HEADERS_FIXED[i].ToArray(), fs);
+                                }
                             }
                         }
                     }
                     Environment.Exit(SUCCESS);
                 }
-                catch (System.IO.FileNotFoundException e)
+                catch (System.IO.FileNotFoundException)
                 {
                     Console.WriteLine(String.Format("Could not find {0} file. Please ensure this application and {0} are located in the same directory.", config.TARGET_FILE));
                     Environment.Exit(GENERIC_PROCESSING_ERROR);
                 }
             }
+        }
+
+        /// <summary>
+        /// Applies a fixed iNES header to a previously extracted ROM if one has been specified in the currently loaded config.json and the user confirms.
+        /// </summary>
+        /// <param name="fixedHeader"></param>
+        /// <param name="fs"></param>
+        private static void fixINesHeader(byte[] fixedHeader, FileStream fs)
+        {
+            bool hasConfirmed = false;
+            do
+            {
+                Console.WriteLine("Apply fixed iNES header to ROM? [y/n]");
+                ConsoleKeyInfo input = Console.ReadKey();
+                switch (input.Key)
+                {
+                    case ConsoleKey.Y:
+                        fs.Seek(0, SeekOrigin.Begin);
+                        fs.Write(fixedHeader, 0, fixedHeader.Length);
+                        Console.WriteLine();
+                        Console.WriteLine(String.Format("Applied fixed iNES header to ROM", fs.Name));
+                        hasConfirmed = true;
+                        break;
+                    case ConsoleKey.N:
+                        Console.WriteLine();
+                        hasConfirmed = true;
+                        break;
+                }
+            } while (!hasConfirmed);
         }
 
         /// <summary>
