@@ -12,5 +12,6 @@ For a default steam installation the path should look something like this: ```C:
 Currently the extractor supports ROM extraction from the following, other releases:
 - [Abarenbo Tengu & Zombie Nation](https://store.steampowered.com/app/1603920)
 - [F-117A Stealth Fighter](https://store.steampowered.com/app/1245170)
+- [Streets of Kamurocho (Streets of Rage 2)](https://steamcommunity.com/app/1368430)
 
 For this to work, do the exact same as with Gimmick but use the config.json from the "alternate_configs" folder that corresponds to the game.
